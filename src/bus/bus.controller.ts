@@ -22,12 +22,8 @@ export class BusController {
   
     @ApiTags('Get')
     @Get(':id')
-    getById(@Param() parametre): Bus{  
-      let busId = this.service.getById(parametre.id);
-      if(busId === undefined || busId === null){
-        throw new HttpException('Could not find a user with the id ${parametre.id}', 404);
-      }
-      return busId;
+    async getById(@Param() parametre): Promise<Bus>{
+      return this.service.getById(parametre.id);
     }
 
     @ApiTags('Get')

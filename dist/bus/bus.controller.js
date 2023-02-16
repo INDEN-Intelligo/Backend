@@ -24,12 +24,8 @@ let BusController = class BusController {
     getAll() {
         return this.service.getAll();
     }
-    getById(parametre) {
-        let busId = this.service.getById(parametre.id);
-        if (busId === undefined || busId === null) {
-            throw new common_1.HttpException('Could not find a user with the id ${parametre.id}', 404);
-        }
-        return busId;
+    async getById(parametre) {
+        return this.service.getById(parametre.id);
     }
     getByIdHour(parametre) {
         let busId = this.service.getByIdHour(parametre.id, parametre.timestamp);
@@ -54,7 +50,7 @@ __decorate([
     __param(0, (0, common_1.Param)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", bus_entity_1.Bus)
+    __metadata("design:returntype", Promise)
 ], BusController.prototype, "getById", null);
 __decorate([
     (0, swagger_1.ApiTags)('Get'),

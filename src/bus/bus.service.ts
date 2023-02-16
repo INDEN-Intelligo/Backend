@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Bus } from './bus.entity';
 import { Position } from '../position/position.entity';
+import { Redis } from 'ioredis';
+import { IORedisKey } from '../redis.module';
 
 import { promises as fs } from 'fs';
 
@@ -45,7 +47,7 @@ export class BusService {
     constructor(
         //@InjectRepository(User)
         //private repository: Repository<User>,
-        
+        @Inject(IORedisKey) private readonly redisClient: Redis,
     ){}
 
     create(Newligne: string, longitude:number, latitude:number): Bus {
@@ -60,13 +62,23 @@ export class BusService {
         return newBus;
     }
 
-    getById(idBus:string): Bus{
-        for (const bus of buss) {
-            if(bus.arret===idBus){
-                return bus;
-            }
+    async getById(id:number):Promise<Bus>{
+        let busN = new Bus();
+        try {
+            const busString = await this.redisClient
+            .multi([['send_command', 'JSON.GET', id, '.']]).exec(); 
+
+            let obj: unknown = busString[0][1];
+
+            if (typeof obj === 'string') {
+                let str = obj as string;
+                const data = JSON.parse(str);
+                return data;
+            }            
+        } catch (e) {
+            console.log("Bus inexistant");
+            throw new InternalServerErrorException(`Failed to get Bus ${id}`);
         }
-        //return this.repository.findOneBy({id:(idU)});
     }
 
     getByIdHour(idBus:string,horraire:Date): Bus{
