@@ -39,7 +39,7 @@ export class BusController {
     @ApiTags('Création')
     @Post()
     @ApiCreatedResponse({description: 'The user has been successfully created.'})
-    create(@Body() input: any): Bus {
-        return this.service.create(input.ligne,input.longitude,input.latitude);
+    async create(@Body() input: any): Promise<Bus> {
+      return this.service.create(input.ligne,input.longitude,input.latitude);
     }
 }

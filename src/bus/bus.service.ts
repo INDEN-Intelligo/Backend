@@ -50,16 +50,22 @@ export class BusService {
         @Inject(IORedisKey) private readonly redisClient: Redis,
     ){}
 
-    create(Newligne: string, longitude:number, latitude:number): Bus {
+    async create(Newligne: string, longitude:number, latitude:number): Promise<Bus> {
 
         let newBus = new Bus();
         let newPos = new Position();
         newPos.SetPosition(longitude,latitude);
         newBus.ligne=Newligne;
         newBus.position=newPos;
-        buss.push(newBus);
-
-        return newBus;
+        try {
+            await this.redisClient
+            .multi([['send_command', 'JSON.SET', newBus.id, '.', JSON.stringify(newBus)]]).exec();
+            return newBus;
+        } catch (e) {
+            console.log("Erreur dans l'ajout");
+        throw new InternalServerErrorException();
+        }
+        //return newBus;
     }
 
     async getById(id:number):Promise<Bus>{
