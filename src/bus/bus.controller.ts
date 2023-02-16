@@ -22,12 +22,8 @@ export class BusController {
   
     @ApiTags('Get')
     @Get(':id')
-    getById(@Param() parametre): Bus{  
-      let busId = this.service.getById(parametre.id);
-      if(busId === undefined || busId === null){
-        throw new HttpException('Could not find a user with the id ${parametre.id}', 404);
-      }
-      return busId;
+    async getById(@Param() parametre): Promise<Bus>{
+      return this.service.getById(parametre.id);
     }
 
     @ApiTags('Get')
@@ -43,7 +39,7 @@ export class BusController {
     @ApiTags('Création')
     @Post()
     @ApiCreatedResponse({description: 'The user has been successfully created.'})
-    create(@Body() input: any): Bus {
-        return this.service.create(input.ligne,input.longitude,input.latitude);
+    async create(@Body() input: any): Promise<Bus> {
+      return this.service.create(input.ligne,input.longitude,input.latitude);
     }
 }

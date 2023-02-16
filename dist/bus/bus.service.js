@@ -8,11 +8,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BusService = void 0;
 const common_1 = require("@nestjs/common");
 const bus_entity_1 = require("./bus.entity");
 const position_entity_1 = require("../position/position.entity");
+const ioredis_1 = require("ioredis");
+const redis_module_1 = require("../redis.module");
 let positionTest = new position_entity_1.Position();
 let dateTest = new Date(2021, 12, 31, 6, 45);
 positionTest.SetPosition(12, 35);
@@ -47,7 +52,9 @@ const buss = [
     },
 ];
 let BusService = class BusService {
-    constructor() { }
+    constructor(redisClient) {
+        this.redisClient = redisClient;
+    }
     create(Newligne, longitude, latitude) {
         let newBus = new bus_entity_1.Bus();
         let newPos = new position_entity_1.Position();
@@ -57,11 +64,21 @@ let BusService = class BusService {
         buss.push(newBus);
         return newBus;
     }
-    getById(idBus) {
-        for (const bus of buss) {
-            if (bus.arret === idBus) {
-                return bus;
+    async getById(id) {
+        let busN = new bus_entity_1.Bus();
+        try {
+            const busString = await this.redisClient
+                .multi([['send_command', 'JSON.GET', id, '.']]).exec();
+            let obj = busString[0][1];
+            if (typeof obj === 'string') {
+                let str = obj;
+                const data = JSON.parse(str);
+                return data;
             }
+        }
+        catch (e) {
+            console.log("Bus inexistant");
+            throw new common_1.InternalServerErrorException(`Failed to get Bus ${id}`);
         }
     }
     getByIdHour(idBus, horraire) {
@@ -77,7 +94,8 @@ let BusService = class BusService {
 };
 BusService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __param(0, (0, common_1.Inject)(redis_module_1.IORedisKey)),
+    __metadata("design:paramtypes", [ioredis_1.Redis])
 ], BusService);
 exports.BusService = BusService;
 //# sourceMappingURL=bus.service.js.map
