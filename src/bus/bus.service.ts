@@ -60,18 +60,18 @@ export class BusService {
         return newBus;
     }
 
-    getById(idBus:string): Bus{
+    getById(idBus:number): Bus{
         for (const bus of buss) {
-            if(bus.arret===idBus){
+            if(bus.id===idBus){
                 return bus;
             }
         }
         //return this.repository.findOneBy({id:(idU)});
     }
 
-    getByIdHour(idBus:string,horraire:Date): Bus{
+    getByIdHour(idBus:number,horraire:Date): Bus{
         for (const bus of buss) {
-            if(bus.arret===idBus && bus.horraire.getHours()=== horraire.getHours() && bus.horraire.getMinutes()=== horraire.getMinutes()){
+            if(bus.id===idBus && bus.horraire.getHours()=== horraire.getHours() && bus.horraire.getMinutes()=== horraire.getMinutes()){
                 return bus;
             }
         }
