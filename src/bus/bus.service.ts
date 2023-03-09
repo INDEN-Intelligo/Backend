@@ -62,7 +62,7 @@ export class BusService {
 
     getById(idBus:number): Bus{
         for (const bus of buss) {
-            if(bus.id===idBus){
+            if(bus.id.toString()===idBus.toString()){
                 return bus;
             }
         }
@@ -71,7 +71,7 @@ export class BusService {
 
     getByIdHour(idBus:number,horraire:Date): Bus{
         for (const bus of buss) {
-            if(bus.id===idBus && bus.horraire.getHours()=== horraire.getHours() && bus.horraire.getMinutes()=== horraire.getMinutes()){
+            if(bus.id.toString()===idBus.toString() && bus.horraire.getHours()=== horraire.getHours() && bus.horraire.getMinutes()=== horraire.getMinutes()){
                 return bus;
             }
         }
