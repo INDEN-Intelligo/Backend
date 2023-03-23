@@ -42,6 +42,8 @@ const buss : Bus[] = [
     },
 ]
 
+let idKey =0;
+
 @Injectable()
 export class BusService {
     constructor(
@@ -58,34 +60,39 @@ export class BusService {
         newBus.ligne=Newligne;
         newBus.position=newPos;
         try {
-            await this.redisClient
-            .multi([['send_command', 'JSON.SET', newBus.id, '.', JSON.stringify(newBus)]]).exec();
+            await this.redisClient.multi().set(`${idKey}`, JSON.stringify(newBus)).exec();
+            idKey++;
             return newBus;
         } catch (e) {
             console.log("Erreur dans l'ajout");
         throw new InternalServerErrorException();
         }
-        //return newBus;
     }
 
-    async getById(id:number):Promise<Bus>{
-        let busN = new Bus();
-        try {
-            const busString = await this.redisClient
-            .multi([['send_command', 'JSON.GET', id, '.']]).exec(); 
+    async getRealTimeBus(id:string):Promise<Bus[]>{ 
+        let bus: Bus[] = [];  
+        let i=0; 
+        const size = await new Promise<number>((resolve, reject) => {
+            this.redisClient.dbsize((err, size) =>{
+                if (err) reject(err);
+                resolve(size);
+            });   
+        });
 
-            let obj: unknown = busString[0][1];
-
-            if (typeof obj === 'string') {
-                let str = obj as string;
-                const data = JSON.parse(str);
-                return data;
-            }            
-        } catch (e) {
-            console.log("Bus inexistant");
-            throw new InternalServerErrorException(`Failed to get Bus ${id}`);
+        while(i<size){
+            const value = await this.redisClient.get(`${i}`);
+            const data = JSON.parse(value);
+            // TODO verifier l'unicité des datas
+            if(data['ligne']===id && !bus.some((busData) => busData['ligne'] === data['ligne'])){
+                bus.push(data);
+            }
+            i++;
         }
+        
+        return bus;
     }
+    
+
 
     getByIdHour(idBus:string,horraire:Date): Bus{
         for (const bus of buss) {

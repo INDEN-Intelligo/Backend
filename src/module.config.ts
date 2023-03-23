@@ -9,7 +9,7 @@ export const redisModule = RedisModule.registerAsync({
 
     return {
       connectionOptions: {
-        host: 'localhost',
+        host: 'cache',
         port: 6379,
       },
       onClientReady: (client) => {

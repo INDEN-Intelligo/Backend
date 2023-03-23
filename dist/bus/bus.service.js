@@ -51,35 +51,46 @@ const buss = [
         arret: "beaulieu"
     },
 ];
+let idKey = 0;
 let BusService = class BusService {
     constructor(redisClient) {
         this.redisClient = redisClient;
     }
-    create(Newligne, longitude, latitude) {
+    async create(Newligne, longitude, latitude) {
         let newBus = new bus_entity_1.Bus();
         let newPos = new position_entity_1.Position();
         newPos.SetPosition(longitude, latitude);
         newBus.ligne = Newligne;
         newBus.position = newPos;
-        buss.push(newBus);
-        return newBus;
-    }
-    async getById(id) {
-        let busN = new bus_entity_1.Bus();
         try {
-            const busString = await this.redisClient
-                .multi([['send_command', 'JSON.GET', id, '.']]).exec();
-            let obj = busString[0][1];
-            if (typeof obj === 'string') {
-                let str = obj;
-                const data = JSON.parse(str);
-                return data;
-            }
+            await this.redisClient.multi().set(`${idKey}`, JSON.stringify(newBus)).exec();
+            idKey++;
+            return newBus;
         }
         catch (e) {
-            console.log("Bus inexistant");
-            throw new common_1.InternalServerErrorException(`Failed to get Bus ${id}`);
+            console.log("Erreur dans l'ajout");
+            throw new common_1.InternalServerErrorException();
         }
+    }
+    async getRealTimeBus(id) {
+        let bus = [];
+        let i = 0;
+        const size = await new Promise((resolve, reject) => {
+            this.redisClient.dbsize((err, size) => {
+                if (err)
+                    reject(err);
+                resolve(size);
+            });
+        });
+        while (i < size) {
+            const value = await this.redisClient.get(`${i}`);
+            const data = JSON.parse(value);
+            if (data['ligne'] === id && !bus.some((busData) => busData['ligne'] === data['ligne'])) {
+                bus.push(data);
+            }
+            i++;
+        }
+        return bus;
     }
     getByIdHour(idBus, horraire) {
         for (const bus of buss) {

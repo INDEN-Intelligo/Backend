@@ -19,11 +19,16 @@ export class BusController {
     async getBusStation(): Promise<any>{   
         return this.service.getAllBusStation();
     }*/
-  
+    @Get('creation')
+    @ApiCreatedResponse({description: 'The user has been successfully created.'})
+    async createGet(): Promise<Bus> {
+      return this.service.create('C7',12.0,13.0);
+    }
+
     @ApiTags('Get')
     @Get(':id')
-    async getById(@Param() parametre): Promise<Bus>{
-      return this.service.getById(parametre.id);
+    async getById(@Param() parametre): Promise<any>{
+      return this.service.getRealTimeBus(parametre.id);
     }
 
     @ApiTags('Get')
@@ -31,7 +36,7 @@ export class BusController {
     getByIdHour(@Param() parametre): Bus{  
       let busId = this.service.getByIdHour(parametre.id,parametre.timestamp);
       if(busId === undefined || busId === null){
-        throw new HttpException('Could not find a user with the id ${parametre.id}', 404);
+        throw new HttpException('Could not find a bus with the id ${parametre.id}', 404);
       }
       return busId;
     }
