@@ -4,7 +4,8 @@ export declare class BusController {
     private service;
     constructor(service: BusService);
     getAll(): Bus[];
-    getById(parametre: any): Bus;
+    createGet(): Promise<Bus>;
+    getById(parametre: any): Promise<any>;
     getByIdHour(parametre: any): Bus;
-    create(input: any): Bus;
+    create(input: any): Promise<Bus>;
 }
