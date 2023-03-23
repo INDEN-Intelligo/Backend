@@ -94,9 +94,9 @@ export class BusService {
     
 
 
-    getByIdHour(idBus:string,horraire:Date): Bus{
+    getByIdHour(idBus:number,horraire:Date): Bus{
         for (const bus of buss) {
-            if(bus.arret===idBus && bus.horraire.getHours()=== horraire.getHours() && bus.horraire.getMinutes()=== horraire.getMinutes()){
+            if(bus.id.toString()===idBus.toString() && bus.horraire.getHours()=== horraire.getHours() && bus.horraire.getMinutes()=== horraire.getMinutes()){
                 return bus;
             }
         }
