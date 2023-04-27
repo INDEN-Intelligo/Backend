@@ -11,13 +11,14 @@ const common_1 = require("@nestjs/common");
 const bus_controller_1 = require("./bus.controller");
 const bus_service_1 = require("./bus.service");
 const module_config_1 = require("../module.config");
+const axios_1 = require("@nestjs/axios");
 let BusModule = class BusModule {
 };
 BusModule = __decorate([
     (0, common_1.Module)({
         controllers: [bus_controller_1.BusController],
         providers: [bus_service_1.BusService],
-        imports: [module_config_1.redisModule],
+        imports: [axios_1.HttpModule, module_config_1.redisModule],
     })
 ], BusModule);
 exports.BusModule = BusModule;

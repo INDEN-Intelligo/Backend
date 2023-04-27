@@ -10,6 +10,7 @@ async function bootstrap() {
         next();
     });
     await app.listen(3000);
+    app.enableCors({ 'origin': 'http://localhost:4200' });
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
