@@ -18,6 +18,7 @@ const bus_entity_1 = require("./bus.entity");
 const position_entity_1 = require("../position/position.entity");
 const ioredis_1 = require("ioredis");
 const redis_module_1 = require("../redis.module");
+const axios_1 = require("@nestjs/axios");
 let positionTest = new position_entity_1.Position();
 let dateTest = new Date(2021, 12, 31, 6, 45);
 positionTest.SetPosition(12, 35);
@@ -53,7 +54,8 @@ const buss = [
 ];
 let idKey = 0;
 let BusService = class BusService {
-    constructor(redisClient) {
+    constructor(httpService, redisClient) {
+        this.httpService = httpService;
         this.redisClient = redisClient;
     }
     async create(Newligne, longitude, latitude) {
@@ -74,27 +76,19 @@ let BusService = class BusService {
     }
     async getRealTimeBus(id) {
         let bus = [];
-        let i = 0;
-        const size = await new Promise((resolve, reject) => {
-            this.redisClient.dbsize((err, size) => {
-                if (err)
-                    reject(err);
-                resolve(size);
-            });
-        });
-        while (i < size) {
-            const value = await this.redisClient.get(`${i}`);
-            const data = JSON.parse(value);
-            if (data['ligne'] === id && !bus.some((busData) => busData['ligne'] === data['ligne'])) {
-                bus.push(data);
-            }
-            i++;
+        if (id == "insa") {
+            const response = await this.httpService.get('http://localhost:8080/array?name=' + 1176).toPromise();
+            const nextBus = response['data'];
+            bus.push(nextBus);
+            const response2 = await this.httpService.get('http://localhost:8080/array?name=' + 1204).toPromise();
+            const nextBus2 = response2['data'];
+            bus.push(nextBus2);
         }
         return bus;
     }
     getByIdHour(idBus, horraire) {
         for (const bus of buss) {
-            if (bus.arret === idBus && bus.horraire.getHours() === horraire.getHours() && bus.horraire.getMinutes() === horraire.getMinutes()) {
+            if (bus.id.toString() === idBus.toString() && bus.horraire.getHours() === horraire.getHours() && bus.horraire.getMinutes() === horraire.getMinutes()) {
                 return bus;
             }
         }
@@ -105,8 +99,9 @@ let BusService = class BusService {
 };
 BusService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(redis_module_1.IORedisKey)),
-    __metadata("design:paramtypes", [ioredis_1.Redis])
+    __param(1, (0, common_1.Inject)(redis_module_1.IORedisKey)),
+    __metadata("design:paramtypes", [axios_1.HttpService,
+        ioredis_1.Redis])
 ], BusService);
 exports.BusService = BusService;
 //# sourceMappingURL=bus.service.js.map

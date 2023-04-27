@@ -10,7 +10,7 @@ exports.redisModule = redis_module_1.RedisModule.registerAsync({
         const logger = new common_1.Logger('RedisModule');
         return {
             connectionOptions: {
-                host: 'localhost',
+                host: 'cache',
                 port: 6379,
             },
             onClientReady: (client) => {

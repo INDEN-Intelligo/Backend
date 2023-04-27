@@ -3,7 +3,8 @@ import { Bus } from './bus.entity';
 import { Position } from '../position/position.entity';
 import { Redis } from 'ioredis';
 import { IORedisKey } from '../redis.module';
-
+import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from 'axios';
 import { promises as fs } from 'fs';
 
 let positionTest = new Position();
@@ -46,9 +47,7 @@ let idKey =0;
 
 @Injectable()
 export class BusService {
-    constructor(
-        //@InjectRepository(User)
-        //private repository: Repository<User>,
+    constructor( private readonly httpService: HttpService,
         @Inject(IORedisKey) private readonly redisClient: Redis,
     ){}
 
@@ -71,24 +70,15 @@ export class BusService {
 
     async getRealTimeBus(id:string):Promise<Bus[]>{ 
         let bus: Bus[] = [];  
-        let i=0; 
-        const size = await new Promise<number>((resolve, reject) => {
-            this.redisClient.dbsize((err, size) =>{
-                if (err) reject(err);
-                resolve(size);
-            });   
-        });
+        if(id=="insa"){
+            const response: AxiosResponse<any> = await this.httpService.get('http://localhost:8080/array?name='+1176).toPromise();
+            const nextBus = response['data'];
+            bus.push(nextBus);
 
-        while(i<size){
-            const value = await this.redisClient.get(`${i}`);
-            const data = JSON.parse(value);
-            // TODO verifier l'unicité des datas
-            if(data['ligne']===id && !bus.some((busData) => busData['ligne'] === data['ligne'])){
-                bus.push(data);
-            }
-            i++;
+            const response2: AxiosResponse<any> = await this.httpService.get('http://localhost:8080/array?name='+1204).toPromise();
+            const nextBus2 = response2['data'];
+            bus.push(nextBus2);
         }
-        
         return bus;
     }
     
